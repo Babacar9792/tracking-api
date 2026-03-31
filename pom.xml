@@ -84,6 +84,7 @@
     </dependencies>
 
     <build>
+        <finalName>tracking-api</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

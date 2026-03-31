@@ -21,7 +21,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/tracking_immo_db?sslmode=disable
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/tracking_db?sslmode=disable
     ports:
       - "8086:8081"
 
