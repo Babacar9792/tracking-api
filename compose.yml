@@ -1,0 +1,29 @@
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: tracking-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tracking_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgweb:
+    image: sosedoff/pgweb
+    container_name: tracking-pgweb
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/tracking_immo_db?sslmode=disable
+    ports:
+      - "8086:8081"
+
+volumes:
+  postgres_data:
