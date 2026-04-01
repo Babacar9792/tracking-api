@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,5 +35,10 @@ public class TrajetRepositoryAdapter implements TrajetRepositoryPort {
     @Override
     public Optional<Trajet> findByShareToken(UUID shareToken) {
         return trajetJpaRepository.findByShareToken(shareToken).map(TrajetMapper::toDomain);
+    }
+
+    @Override
+    public List<Trajet> findAll() {
+        return trajetJpaRepository.findAll().stream().map(TrajetMapper::toDomain).toList();
     }
 }

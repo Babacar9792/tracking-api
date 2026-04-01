@@ -4,6 +4,7 @@ import com.bellibabs.trackingapi.domain.model.PositionEvent;
 import com.bellibabs.trackingapi.domain.model.Trajet;
 import com.bellibabs.trackingapi.domain.model.TrajetStatut;
 import com.bellibabs.trackingapi.domain.port.in.CreateTrajetUseCase;
+import com.bellibabs.trackingapi.domain.port.in.GetAllTrajetsUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetByShareTokenUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetHistoryUseCase;
 import com.bellibabs.trackingapi.domain.port.in.SendPositionUseCase;
@@ -24,7 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TrajetServiceImpl implements CreateTrajetUseCase, SendPositionUseCase,
-        GetTrajetByShareTokenUseCase, GetTrajetHistoryUseCase {
+        GetTrajetByShareTokenUseCase, GetTrajetHistoryUseCase, GetAllTrajetsUseCase {
 
     private final TrajetRepositoryPort trajetRepositoryPort;
     private final PositionRepositoryPort positionRepositoryPort;
@@ -88,6 +89,14 @@ public class TrajetServiceImpl implements CreateTrajetUseCase, SendPositionUseCa
                     log.warn("event.action=GET_TRAJET_BY_TOKEN, event.outcome=FAILURE, message=Trajet not found, shareToken={}", shareToken);
                     return new IllegalArgumentException("Trajet introuvable pour le token : " + shareToken);
                 });
+    }
+
+    @Override
+    public List<Trajet> getAllTrajets() {
+        log.info("event.action=GET_ALL_TRAJETS, event.outcome=STARTED");
+        List<Trajet> trajets = trajetRepositoryPort.findAll();
+        log.info("event.action=GET_ALL_TRAJETS, event.outcome=SUCCESS, count={}", trajets.size());
+        return trajets;
     }
 
     @Override

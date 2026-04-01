@@ -3,6 +3,7 @@ package com.bellibabs.trackingapi.infrastructure.adapter.in.web;
 import com.bellibabs.trackingapi.domain.model.PositionEvent;
 import com.bellibabs.trackingapi.domain.model.Trajet;
 import com.bellibabs.trackingapi.domain.port.in.CreateTrajetUseCase;
+import com.bellibabs.trackingapi.domain.port.in.GetAllTrajetsUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetByShareTokenUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetHistoryUseCase;
 import com.bellibabs.trackingapi.infrastructure.adapter.in.dto.PositionEventDto;
@@ -36,11 +37,27 @@ import java.util.UUID;
 public class TrajetController {
 
     private final CreateTrajetUseCase createTrajetUseCase;
+    private final GetAllTrajetsUseCase getAllTrajetsUseCase;
     private final GetTrajetByShareTokenUseCase getTrajetByShareTokenUseCase;
     private final GetTrajetHistoryUseCase getTrajetHistoryUseCase;
 
     @Value("${app.tracking.base-url:https://app.com}")
     private String trackingBaseUrl;
+
+    @Operation(summary = "Lister tous les trajets", description = "Retourne la liste complète de tous les trajets enregistrés.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Liste des trajets",
+                    content = @Content(schema = @Schema(implementation = TrajetDto.class)))
+    })
+    @GetMapping
+    public ResponseEntity<List<TrajetDto>> getAllTrajets() {
+        log.info("event.action=GET_ALL_TRAJETS_REQUEST, event.outcome=RECEIVED");
+        List<TrajetDto> dtos = getAllTrajetsUseCase.getAllTrajets().stream()
+                .map(t -> TrajetMapper.toDto(t, trackingBaseUrl))
+                .toList();
+        log.info("event.action=GET_ALL_TRAJETS_REQUEST, event.outcome=SUCCESS, count={}", dtos.size());
+        return ResponseEntity.ok(dtos);
+    }
 
     @Operation(summary = "Créer un trajet", description = "Démarre un nouveau trajet et génère un lien de partage unique.")
     @ApiResponses({
