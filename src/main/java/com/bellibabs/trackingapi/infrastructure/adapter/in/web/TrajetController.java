@@ -68,7 +68,10 @@ public class TrajetController {
     @PostMapping
     public ResponseEntity<TrajetDto> createTrajet(@RequestBody @Valid CreateTrajetRequest request) {
         log.info("event.action=CREATE_TRAJET_REQUEST, event.outcome=RECEIVED, clientId={}", request.getClientId());
-        Trajet trajet = createTrajetUseCase.createTrajet(request.getClientId());
+        Trajet trajet = createTrajetUseCase.createTrajet(
+                request.getClientId(),
+                request.getDepartureLatitude(), request.getDepartureLongitude(),
+                request.getArrivalLatitude(), request.getArrivalLongitude());
         TrajetDto dto = TrajetMapper.toDto(trajet, trackingBaseUrl);
         log.info("event.action=CREATE_TRAJET_REQUEST, event.outcome=SUCCESS, trajetId={}", dto.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);

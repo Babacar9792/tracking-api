@@ -16,6 +16,10 @@ public class TrajetMapper {
         dto.setShareToken(trajet.getShareToken());
         dto.setCreatedAt(trajet.getCreatedAt());
         dto.setTrackingUrl(baseUrl + "/tracking/" + trajet.getShareToken());
+        dto.setDepartureLatitude(trajet.getDepartureLatitude());
+        dto.setDepartureLongitude(trajet.getDepartureLongitude());
+        dto.setArrivalLatitude(trajet.getArrivalLatitude());
+        dto.setArrivalLongitude(trajet.getArrivalLongitude());
         return dto;
     }
 
@@ -25,7 +29,11 @@ public class TrajetMapper {
                 entity.getClientId(),
                 entity.getStatut(),
                 entity.getShareToken(),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getDepartureLatitude(),
+                entity.getDepartureLongitude(),
+                entity.getArrivalLatitude(),
+                entity.getArrivalLongitude()
         );
     }
 
@@ -35,7 +43,11 @@ public class TrajetMapper {
                 trajet.getClientId(),
                 trajet.getStatut(),
                 trajet.getShareToken(),
-                trajet.getCreatedAt()
+                trajet.getCreatedAt(),
+                trajet.getDepartureLatitude(),
+                trajet.getDepartureLongitude(),
+                trajet.getArrivalLatitude(),
+                trajet.getArrivalLongitude()
         );
     }
 }

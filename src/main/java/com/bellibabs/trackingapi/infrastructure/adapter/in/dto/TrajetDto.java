@@ -17,4 +17,8 @@ public class TrajetDto {
     private UUID shareToken;
     private LocalDateTime createdAt;
     private String trackingUrl;
+    private Double departureLatitude;
+    private Double departureLongitude;
+    private Double arrivalLatitude;
+    private Double arrivalLongitude;
 }

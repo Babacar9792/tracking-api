@@ -32,7 +32,9 @@ public class TrajetServiceImpl implements CreateTrajetUseCase, SendPositionUseCa
     private final PositionPublisherPort positionPublisherPort;
 
     @Override
-    public Trajet createTrajet(String clientId) {
+    public Trajet createTrajet(String clientId,
+                               Double departureLatitude, Double departureLongitude,
+                               Double arrivalLatitude, Double arrivalLongitude) {
         String traceId = MDC.get("traceId");
         log.info("event.action=CREATE_TRAJET, event.outcome=STARTED, clientId={}, traceId={}", clientId, traceId);
 
@@ -42,10 +44,14 @@ public class TrajetServiceImpl implements CreateTrajetUseCase, SendPositionUseCa
         trajet.setStatut(TrajetStatut.STARTED);
         trajet.setShareToken(UUID.randomUUID());
         trajet.setCreatedAt(LocalDateTime.now());
+        trajet.setDepartureLatitude(departureLatitude);
+        trajet.setDepartureLongitude(departureLongitude);
+        trajet.setArrivalLatitude(arrivalLatitude);
+        trajet.setArrivalLongitude(arrivalLongitude);
 
         Trajet saved = trajetRepositoryPort.save(trajet);
-        log.info("event.action=CREATE_TRAJET, event.outcome=SUCCESS, trajetId={}, shareToken={}, traceId={}",
-                saved.getId(), saved.getShareToken(), traceId);
+        log.info("event.action=CREATE_TRAJET, event.outcome=SUCCESS, trajetId={}, shareToken={}, departureLat={}, departureLng={}, traceId={}",
+                saved.getId(), saved.getShareToken(), departureLatitude, departureLongitude, traceId);
         return saved;
     }
 

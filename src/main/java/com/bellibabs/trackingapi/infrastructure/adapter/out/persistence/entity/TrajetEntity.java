@@ -31,4 +31,12 @@ public class TrajetEntity {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    private Double departureLatitude;
+
+    private Double departureLongitude;
+
+    private Double arrivalLatitude;
+
+    private Double arrivalLongitude;
 }
