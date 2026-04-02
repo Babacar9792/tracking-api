@@ -15,7 +15,7 @@ public class TrajetMapper {
         dto.setStatut(trajet.getStatut().name());
         dto.setShareToken(trajet.getShareToken());
         dto.setCreatedAt(trajet.getCreatedAt());
-        dto.setTrackingUrl(baseUrl + "/tracking/" + trajet.getShareToken());
+        dto.setTrackingUrl(baseUrl  + trajet.getShareToken());
         dto.setDepartureLatitude(trajet.getDepartureLatitude());
         dto.setDepartureLongitude(trajet.getDepartureLongitude());
         dto.setArrivalLatitude(trajet.getArrivalLatitude());
