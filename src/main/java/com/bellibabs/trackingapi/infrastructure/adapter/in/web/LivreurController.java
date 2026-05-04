@@ -2,13 +2,13 @@ package com.bellibabs.trackingapi.infrastructure.adapter.in.web;
 
 import com.bellibabs.trackingapi.domain.model.LivreurPosition;
 import com.bellibabs.trackingapi.domain.port.in.GetNearbyLivreursUseCase;
+import com.bellibabs.trackingapi.infrastructure.adapter.in.dto.ApiResponse;
 import com.bellibabs.trackingapi.infrastructure.adapter.in.dto.NearbyLivreurDto;
 import com.bellibabs.trackingapi.infrastructure.adapter.out.persistence.mapper.LivreurPositionMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.DecimalMax;
@@ -41,12 +41,12 @@ public class LivreurController {
             description = "Retourne les livreurs disponibles dans le rayon donné autour d'une adresse de départ, triés par distance ASC."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Liste des livreurs proches",
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Liste des livreurs proches",
                     content = @Content(schema = @Schema(implementation = NearbyLivreurDto.class))),
-            @ApiResponse(responseCode = "400", description = "Paramètres invalides", content = @Content)
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Paramètres invalides", content = @Content)
     })
     @GetMapping("/nearby")
-    public ResponseEntity<List<NearbyLivreurDto>> getNearbyLivreurs(
+    public ResponseEntity<ApiResponse<List<NearbyLivreurDto>>> getNearbyLivreurs(
             @Parameter(description = "Latitude du point de départ")
             @RequestParam @NotNull @DecimalMin("-90.0") @DecimalMax("90.0") Double latitude,
 
@@ -65,6 +65,11 @@ public class LivreurController {
                 .toList();
 
         log.info("event.action=GET_NEARBY_LIVREURS_REQUEST, event.outcome=SUCCESS, count={}", dtos.size());
-        return ResponseEntity.ok(dtos);
+
+        String message = dtos.isEmpty()
+                ? "Aucun livreur disponible dans un rayon de " + radiusKm + " km"
+                : dtos.size() + " livreur(s) trouvé(s) dans un rayon de " + radiusKm + " km";
+
+        return ResponseEntity.ok(new ApiResponse<>(message, dtos));
     }
 }
