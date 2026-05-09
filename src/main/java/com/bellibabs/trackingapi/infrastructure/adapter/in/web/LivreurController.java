@@ -1,6 +1,6 @@
 package com.bellibabs.trackingapi.infrastructure.adapter.in.web;
 
-import com.bellibabs.trackingapi.domain.model.LivreurPosition;
+import com.bellibabs.trackingapi.domain.model.NearbyLivreursResult;
 import com.bellibabs.trackingapi.domain.port.in.GetNearbyLivreursUseCase;
 import com.bellibabs.trackingapi.infrastructure.adapter.in.dto.ApiResponse;
 import com.bellibabs.trackingapi.infrastructure.adapter.in.dto.NearbyLivreurDto;
@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +37,7 @@ public class LivreurController {
 
     @Operation(
             summary = "Livreurs à proximité",
-            description = "Retourne les livreurs disponibles dans le rayon donné autour d'une adresse de départ, triés par distance ASC."
+            description = "Recherche les livreurs disponibles en partant d'un rayon de 5 km, doublé automatiquement jusqu'au maximum configuré si aucun résultat n'est trouvé. Résultats triés par distance ASC."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Liste des livreurs proches",
@@ -51,24 +50,21 @@ public class LivreurController {
             @RequestParam @NotNull @DecimalMin("-90.0") @DecimalMax("90.0") Double latitude,
 
             @Parameter(description = "Longitude du point de départ")
-            @RequestParam @NotNull @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
-
-            @Parameter(description = "Rayon de recherche en kilomètres (défaut : 5 km)")
-            @RequestParam(defaultValue = "5.0") @Positive Double radiusKm
+            @RequestParam @NotNull @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude
     ) {
-        log.info("event.action=GET_NEARBY_LIVREURS_REQUEST, event.outcome=RECEIVED, lat={}, lng={}, radiusKm={}",
-                latitude, longitude, radiusKm);
+        log.info("event.action=GET_NEARBY_LIVREURS_REQUEST, event.outcome=RECEIVED, lat={}, lng={}", latitude, longitude);
 
-        List<LivreurPosition> positions = getNearbyLivreursUseCase.getNearbyLivreurs(latitude, longitude, radiusKm);
-        List<NearbyLivreurDto> dtos = positions.stream()
+        NearbyLivreursResult result = getNearbyLivreursUseCase.getNearbyLivreurs(latitude, longitude);
+        List<NearbyLivreurDto> dtos = result.livreurs().stream()
                 .map(LivreurPositionMapper::toDto)
                 .toList();
 
-        log.info("event.action=GET_NEARBY_LIVREURS_REQUEST, event.outcome=SUCCESS, count={}", dtos.size());
+        log.info("event.action=GET_NEARBY_LIVREURS_REQUEST, event.outcome=SUCCESS, count={}, effectiveRadiusKm={}",
+                dtos.size(), result.effectiveRadiusKm());
 
         String message = dtos.isEmpty()
-                ? "Aucun livreur disponible dans un rayon de " + radiusKm + " km"
-                : dtos.size() + " livreur(s) trouvé(s) dans un rayon de " + radiusKm + " km";
+                ? "Aucun livreur disponible dans un rayon de " + result.effectiveRadiusKm() + " km (rayon maximum atteint)"
+                : dtos.size() + " livreur(s) trouvé(s) dans un rayon de " + result.effectiveRadiusKm() + " km";
 
         return ResponseEntity.ok(new ApiResponse<>(message, dtos));
     }

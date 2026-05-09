@@ -1,9 +1,7 @@
 package com.bellibabs.trackingapi.domain.port.in;
 
-import com.bellibabs.trackingapi.domain.model.LivreurPosition;
-
-import java.util.List;
+import com.bellibabs.trackingapi.domain.model.NearbyLivreursResult;
 
 public interface GetNearbyLivreursUseCase {
-    List<LivreurPosition> getNearbyLivreurs(Double latitude, Double longitude, Double radiusKm);
+    NearbyLivreursResult getNearbyLivreurs(Double latitude, Double longitude);
 }
