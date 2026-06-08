@@ -1,6 +1,7 @@
 package com.bellibabs.trackingapi.infrastructure.adapter.out.persistence;
 
 import com.bellibabs.trackingapi.domain.model.Trajet;
+import com.bellibabs.trackingapi.domain.model.TrajetStatut;
 import com.bellibabs.trackingapi.domain.port.out.TrajetRepositoryPort;
 import com.bellibabs.trackingapi.infrastructure.adapter.out.persistence.mapper.TrajetMapper;
 import com.bellibabs.trackingapi.infrastructure.adapter.out.persistence.repository.TrajetJpaRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 
 @Slf4j
 @Component
@@ -40,5 +42,13 @@ public class TrajetRepositoryAdapter implements TrajetRepositoryPort {
     @Override
     public List<Trajet> findAll() {
         return trajetJpaRepository.findAll().stream().map(TrajetMapper::toDomain).toList();
+    }
+
+    @Override
+    public Optional<Trajet> findActiveByClientId(String clientId) {
+        List<TrajetStatut> activeStatuts = List.of(TrajetStatut.STARTED, TrajetStatut.IN_PROGRESS);
+        return trajetJpaRepository
+                .findFirstByClientIdAndStatutInOrderByCreatedAtDesc(clientId, activeStatuts)
+                .map(TrajetMapper::toDomain);
     }
 }

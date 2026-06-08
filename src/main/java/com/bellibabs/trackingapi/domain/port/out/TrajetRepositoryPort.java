@@ -11,4 +11,5 @@ public interface TrajetRepositoryPort {
     Optional<Trajet> findById(UUID id);
     Optional<Trajet> findByShareToken(UUID shareToken);
     List<Trajet> findAll();
+    Optional<Trajet> findActiveByClientId(String clientId);
 }

@@ -4,6 +4,7 @@ import com.bellibabs.trackingapi.domain.model.PositionEvent;
 import com.bellibabs.trackingapi.domain.model.Trajet;
 import com.bellibabs.trackingapi.domain.model.TrajetStatut;
 import com.bellibabs.trackingapi.domain.port.in.CreateTrajetUseCase;
+import com.bellibabs.trackingapi.domain.port.in.GetActiveTrajetByClientIdUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetAllTrajetsUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetByShareTokenUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetHistoryUseCase;
@@ -25,7 +26,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TrajetServiceImpl implements CreateTrajetUseCase, SendPositionUseCase,
-        GetTrajetByShareTokenUseCase, GetTrajetHistoryUseCase, GetAllTrajetsUseCase {
+        GetTrajetByShareTokenUseCase, GetTrajetHistoryUseCase, GetAllTrajetsUseCase,
+        GetActiveTrajetByClientIdUseCase {
 
     private final TrajetRepositoryPort trajetRepositoryPort;
     private final PositionRepositoryPort positionRepositoryPort;
@@ -103,6 +105,23 @@ public class TrajetServiceImpl implements CreateTrajetUseCase, SendPositionUseCa
         List<Trajet> trajets = trajetRepositoryPort.findAll();
         log.info("event.action=GET_ALL_TRAJETS, event.outcome=SUCCESS, count={}", trajets.size());
         return trajets;
+    }
+
+    @Override
+    public Trajet getActiveTrajet(String clientId) {
+        String traceId = MDC.get("traceId");
+        log.info("event.action=GET_ACTIVE_TRAJET, event.outcome=STARTED, clientId={}, traceId={}", clientId, traceId);
+
+        return trajetRepositoryPort.findActiveByClientId(clientId)
+                .map(trajet -> {
+                    log.info("event.action=GET_ACTIVE_TRAJET, event.outcome=SUCCESS, clientId={}, trajetId={}, traceId={}",
+                            clientId, trajet.getId(), traceId);
+                    return trajet;
+                })
+                .orElseThrow(() -> {
+                    log.warn("event.action=GET_ACTIVE_TRAJET, event.outcome=FAILURE, message=No active trajet, clientId={}", clientId);
+                    return new IllegalArgumentException("Aucun trajet actif pour le client : " + clientId);
+                });
     }
 
     @Override

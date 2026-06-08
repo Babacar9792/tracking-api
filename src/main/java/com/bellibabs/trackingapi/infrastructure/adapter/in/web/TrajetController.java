@@ -3,6 +3,7 @@ package com.bellibabs.trackingapi.infrastructure.adapter.in.web;
 import com.bellibabs.trackingapi.domain.model.PositionEvent;
 import com.bellibabs.trackingapi.domain.model.Trajet;
 import com.bellibabs.trackingapi.domain.port.in.CreateTrajetUseCase;
+import com.bellibabs.trackingapi.domain.port.in.GetActiveTrajetByClientIdUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetAllTrajetsUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetByShareTokenUseCase;
 import com.bellibabs.trackingapi.domain.port.in.GetTrajetHistoryUseCase;
@@ -40,6 +41,7 @@ public class TrajetController {
     private final GetAllTrajetsUseCase getAllTrajetsUseCase;
     private final GetTrajetByShareTokenUseCase getTrajetByShareTokenUseCase;
     private final GetTrajetHistoryUseCase getTrajetHistoryUseCase;
+    private final GetActiveTrajetByClientIdUseCase getActiveTrajetByClientIdUseCase;
 
     @Value("${app.tracking.base-url:https://app.com}")
     private String trackingBaseUrl;
@@ -103,5 +105,21 @@ public class TrajetController {
         log.info("event.action=GET_HISTORY_REQUEST, event.outcome=RECEIVED, trajetId={}", trajetId);
         List<PositionEvent> history = getTrajetHistoryUseCase.getTrajetHistory(trajetId);
         return ResponseEntity.ok(history.stream().map(PositionEventMapper::toDto).toList());
+    }
+
+    @Operation(summary = "Trajet actif d'un client", description = "Retourne le trajet actif (STARTED ou IN_PROGRESS) le plus récent d'un client.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Trajet actif trouvé",
+                    content = @Content(schema = @Schema(implementation = TrajetDto.class))),
+            @ApiResponse(responseCode = "400", description = "Aucun trajet actif pour ce client", content = @Content)
+    })
+    @GetMapping("/active/{clientId}")
+    public ResponseEntity<TrajetDto> getActiveTrajet(
+            @Parameter(description = "Identifiant du client") @PathVariable String clientId) {
+        log.info("event.action=GET_ACTIVE_TRAJET_REQUEST, event.outcome=RECEIVED, clientId={}", clientId);
+        Trajet trajet = getActiveTrajetByClientIdUseCase.getActiveTrajet(clientId);
+        TrajetDto dto = TrajetMapper.toDto(trajet, trackingBaseUrl);
+        log.info("event.action=GET_ACTIVE_TRAJET_REQUEST, event.outcome=SUCCESS, clientId={}, trajetId={}", clientId, dto.getId());
+        return ResponseEntity.ok(dto);
     }
 }
